@@ -18,15 +18,17 @@ import android.widget.ImageView;
 public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
     //每次最少
-    private int perSizeMin = 1;
+    final private int perSizeMin = 1;
     //每次最多
-    private int perSizeMax = 3;
+    final private int perSizeMax = 3;
     //增加控件的最大时间间隔
-    private int perCreateMaxDelay = 500;
+    final private int perCreateMaxDelay = 500;
     //增加控件的最小时间间隔
-    private int perCreateMinDelay = 400;
-
-    private int mImageViewDrawable = R.drawable.red_package_animate_drawable;
+    final private int perCreateMinDelay = 400;
+    //下落时长
+    final private int perChildFallDuration = 4000;
+    //默认图片
+    final private int mImageViewDrawable = R.drawable.red_package_animate_drawable;
 
 
     public AnimateLayout(Context context) {
@@ -49,7 +51,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
             return;
         }
         removeCallbacks(createChildRunnable);
-        postDelayed(createChildRunnable, 0);
+        postDelayed(createChildRunnable, 50);
     }
 
     @Override
@@ -58,17 +60,28 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         removeCallbacks(createChildRunnable);
     }
 
+    private int mPreCreateSize = 0;
+
     private Runnable createChildRunnable = new Runnable() {
         @Override
         public void run() {
-            int createSize = (int) (perSizeMin + (perSizeMax - perSizeMin + 0.5) * Math.random());
-            int[] leftOffset = new int[createSize];
-            for (int i = 0; i < createSize; i++) {
-                View childView = addChildImageView(i, leftOffset);
-                LayoutParams layoutParams = (LayoutParams) childView.getLayoutParams();
-                leftOffset[i] = layoutParams.leftMargin;
+            if (getWidth() > 0 && getHeight() > 0) {
+                int createSizeSeed = perSizeMin;
+                if (mPreCreateSize == perSizeMin) {
+                    createSizeSeed = Math.min(createSizeSeed + 1, perSizeMax);
+                }
+                int createSize = (int) (createSizeSeed + (perSizeMax - createSizeSeed + 0.5) * Math.random());
+                int[] leftOffset = new int[createSize];
+                for (int i = 0; i < createSize; i++) {
+                    View childView = addChildImageView(i, leftOffset);
+                    LayoutParams layoutParams = (LayoutParams) childView.getLayoutParams();
+                    leftOffset[i] = layoutParams.leftMargin;
+                }
+                mPreCreateSize = createSize;
+                postDelayed(this, (long) (perCreateMinDelay + Math.random() * (perCreateMaxDelay - perCreateMinDelay + 0.5f)));
+            } else {
+                postDelayed(this, 50);
             }
-            postDelayed(this, (long) (perCreateMinDelay + Math.random() * (perCreateMaxDelay - perCreateMinDelay + 0.5f)));
         }
     };
 
@@ -96,7 +109,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         layoutParams.topMargin = -measuredHeight;
         addView(childView, layoutParams);
         childView.setRotation((float) (Math.random() * 45) * (Math.random() > 0.5f ? 1 : -1));
-        childView.animate().setInterpolator(new LinearInterpolator()).translationY((float) (getHeight() + measuredHeight * 1.5)).setDuration(5000).setListener(new Animator.AnimatorListener() {
+        childView.animate().setInterpolator(new LinearInterpolator()).translationY((float) (getHeight() + measuredHeight * 1.5)).setDuration(perChildFallDuration).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -138,10 +151,11 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
                     break;
                 }
             }
+
             if (isRight) {
                 Log.e("createLeftMargin", "createRight by " + createCount);
                 return value;
-            } else if (createCount >= 25) {
+            } else if (createCount >= 50) {
                 Log.e("createLeftMargin", "createNotRight by " + createCount);
                 return value;
             }
