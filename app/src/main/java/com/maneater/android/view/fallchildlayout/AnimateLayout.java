@@ -17,10 +17,15 @@ import android.widget.ImageView;
 
 public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
+    //每次最少
     private int perSizeMin = 1;
+    //每次最多
     private int perSizeMax = 3;
+    //每次最大间隔
     private int perCreateMaxDelay = 700;
+    //每次最小间隔
     private int perCreateMinDelay = 550;
+
 
     public AnimateLayout(Context context) {
         this(context, null);
