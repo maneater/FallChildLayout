@@ -67,7 +67,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
     protected View createChildView(int index) {
         final ImageView imageView = new AppCompatImageView(getContext());
-        imageView.setImageResource(R.drawable.red_package);
+        imageView.setImageResource(R.drawable.red_package_animate_drawable);
         return imageView;
     }
 
