@@ -1,0 +1,9 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/red_package">
+    <target
+        android:name="eye_left"
+        android:animation="@anim/red_package_scale" />
+    <target
+        android:name="eye_right"
+        android:animation="@anim/red_package_scale" />
+</animated-vector>
