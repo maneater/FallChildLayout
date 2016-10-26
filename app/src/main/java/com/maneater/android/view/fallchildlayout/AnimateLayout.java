@@ -26,6 +26,8 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
     //增加控件的最小时间间隔
     private int perCreateMinDelay = 550;
 
+    private int mImageViewDrawable = R.drawable.red_package_animate_drawable;
+
 
     public AnimateLayout(Context context) {
         this(context, null);
@@ -70,9 +72,13 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         }
     };
 
+    /**
+     * @param index
+     * @return 可在这里返回任意View
+     */
     protected View createChildView(int index) {
         final ImageView imageView = new AppCompatImageView(getContext());
-        imageView.setImageResource(R.drawable.red_package_animate_drawable);
+        imageView.setImageResource(mImageViewDrawable);
         return imageView;
     }
 
