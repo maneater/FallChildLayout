@@ -21,9 +21,9 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
     private int perSizeMin = 1;
     //每次最多
     private int perSizeMax = 3;
-    //每次最大间隔
+    //增加控件的最大时间间隔
     private int perCreateMaxDelay = 700;
-    //每次最小间隔
+    //增加控件的最小时间间隔
     private int perCreateMinDelay = 550;
 
 
