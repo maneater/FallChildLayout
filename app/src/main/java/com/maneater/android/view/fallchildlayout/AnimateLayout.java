@@ -1,6 +1,7 @@
 package com.maneater.android.view.fallchildlayout;
 
 import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
@@ -10,12 +11,18 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import java.lang.ref.WeakReference;
+
 
 public class AnimateLayout extends FrameLayout implements View.OnClickListener {
+
+    private final int ANIMATOR_ID = 0x7f0b0000;
+    private final int ANIMATOR_LISTENER_ID = 0x7f0b0001;
 
     //每次最少
     final private int perSizeMin = 1;
@@ -61,10 +68,15 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
     }
 
     private int mPreCreateSize = 0;
+    private boolean createFinished = false;
 
     private Runnable createChildRunnable = new Runnable() {
         @Override
         public void run() {
+            if (createFinished) {
+                return;
+            }
+
             if (getWidth() > 0 && getHeight() > 0) {
                 int createSizeSeed = perSizeMin;
                 if (mPreCreateSize == perSizeMin) {
@@ -97,6 +109,8 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
     private View addChildImageView(int index, int[] exceptOffset) {
         final View childView = createChildView(index);
+
+
         LayoutParams layoutParams = generateDefaultLayoutParams();
         layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -109,30 +123,66 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         layoutParams.topMargin = -measuredHeight;
         addView(childView, layoutParams);
         childView.setRotation((float) (Math.random() * 45) * (Math.random() > 0.5f ? 1 : -1));
-        childView.animate().setInterpolator(new LinearInterpolator()).translationY((float) (getHeight() + measuredHeight * 1.5)).setDuration(perChildFallDuration).setListener(new Animator.AnimatorListener() {
+
+
+        final ValueAnimator animator = ValueAnimator.ofFloat((float) (getHeight() + measuredHeight * 1.5));
+        final ChildAnimatorListener childAnimatorListener = new ChildAnimatorListener(childView);
+        childView.setTag(ANIMATOR_ID, animator);
+        childView.setTag(ANIMATOR_LISTENER_ID, childAnimatorListener);
+        animator.setInterpolator(new LinearInterpolator());
+        animator.setRepeatMode(ValueAnimator.RESTART);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setDuration(perChildFallDuration);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
-            public void onAnimationStart(Animator animation) {
-
+            public void onAnimationUpdate(ValueAnimator animation) {
+                ViewCompat.setTranslationY(childView, (Float) animation.getAnimatedValue());
             }
+        });
+        animator.addListener(childAnimatorListener);
+        animator.start();
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                removeView(childView);
-                childView.setOnClickListener(null);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                childView.animate().setListener(null);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        }).start();
         childView.setOnClickListener(AnimateLayout.this);
         return childView;
+    }
+
+    private class ChildAnimatorListener implements Animator.AnimatorListener {
+
+        private WeakReference<View> targetView = null;
+
+        public ChildAnimatorListener(View targetView) {
+            this.targetView = new WeakReference<View>(targetView);
+        }
+
+        private boolean finishWhenRepeat = false;
+
+        public void setFinishWhenRepeat(boolean finishWhenRepeat) {
+            this.finishWhenRepeat = finishWhenRepeat;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            createFinished = true;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+            createFinished = true;
+            if (finishWhenRepeat) {
+                animation.cancel();
+                removeView(targetView.get());
+            }
+        }
     }
 
     private int createLeftMargin(int maxValue, int viewWidth, int[] except) {
@@ -183,8 +233,13 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         clickView = view;
         invalidate();
 
+        finishChildAnimator();
+
         removeCallbacks(createChildRunnable);
-        view.animate().cancel();
+        Animator animator = (Animator) view.getTag(ANIMATOR_ID);
+        if (animator != null) {
+            animator.cancel();
+        }
 
         if (view instanceof ImageView && ((ImageView) view).getDrawable() instanceof Animatable) {
             Drawable drawable = ((ImageView) view).getDrawable();
@@ -229,6 +284,15 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
             }
         }).start();
+    }
+
+    private void finishChildAnimator() {
+        int childSize = getChildCount();
+        for (int i = 0; i < childSize; i++) {
+            View view = getChildAt(i);
+            ChildAnimatorListener listener = (ChildAnimatorListener) view.getTag(ANIMATOR_LISTENER_ID);
+            listener.setFinishWhenRepeat(true);
+        }
     }
 
     private ChildClickListener childClickListener = null;
