@@ -137,9 +137,10 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
     private int createLeftMargin(int maxValue, int viewWidth, int[] except) {
         int createCount = 0;
+        int value = 0;
         do {
             createCount++;
-            int value = (int) (Math.random() * maxValue);
+            value = (int) (Math.random() * maxValue);
 
             boolean isRight = true;
 
