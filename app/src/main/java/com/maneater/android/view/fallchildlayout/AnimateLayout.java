@@ -153,6 +153,12 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
     private View clickView = null;
 
+
+    public void stopAnimateChild() {
+        isFinished = true;
+        removeCallbacks(createChildRunnable);
+    }
+
     @Override
     public void onClick(final View view) {
         if (isFinished) {
