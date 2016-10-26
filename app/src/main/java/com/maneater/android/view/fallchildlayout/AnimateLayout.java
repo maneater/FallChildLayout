@@ -22,9 +22,9 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
     //每次最多
     private int perSizeMax = 3;
     //增加控件的最大时间间隔
-    private int perCreateMaxDelay = 700;
+    private int perCreateMaxDelay = 500;
     //增加控件的最小时间间隔
-    private int perCreateMinDelay = 550;
+    private int perCreateMinDelay = 400;
 
     private int mImageViewDrawable = R.drawable.red_package_animate_drawable;
 
