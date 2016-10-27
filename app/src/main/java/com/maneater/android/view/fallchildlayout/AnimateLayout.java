@@ -35,7 +35,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
     //下落时长
     final private int perChildFallDuration = 4000;
     //默认图片
-    final private int mImageViewDrawable = R.drawable.red_package_animate_drawable;
+    final private int mImageViewDrawable = R.drawable.pred_picone;
 
 
     public AnimateLayout(Context context) {
