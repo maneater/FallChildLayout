@@ -5,10 +5,8 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -26,7 +24,7 @@ import java.util.ArrayList;
  * TODO
  */
 
-public class AnimateView extends View implements AnimateView.ChildListener {
+public class AnimateView extends View implements AnimateChild.ChildListener {
     private final int ANIMATOR_ID = 0x7f0b0000;
     private final int ANIMATOR_LISTENER_ID = 0x7f0b0001;
 
@@ -331,87 +329,5 @@ public class AnimateView extends View implements AnimateView.ChildListener {
         return super.onTouchEvent(event);
     }
 
-    public interface AnimateChild {
 
-        boolean onTouchDown();
-
-        void setFrame(float left, float top);
-
-        float getX();
-
-        float getY();
-
-        AnimateChild setX(float x);
-
-        AnimateChild setY(float y);
-
-        float getLeft();
-
-        float getTop();
-
-        float getTransX();
-
-        float getTransY();
-
-        float getScaleX();
-
-        float getScaleY();
-
-        float getRotation();
-
-        AnimateChild setTransX(float transX);
-
-        AnimateChild setTransY(float transY);
-
-        AnimateChild setTrans(float transX, float transY);
-
-        AnimateChild setScale(float scaleX, float scaleY);
-
-        AnimateChild setRotation(float rotation);
-
-        int getWidth();
-
-        int getHeight();
-
-        void onDraw(Canvas canvas);
-
-        void setListener(ChildListener childListener);
-    }
-
-    public interface ChildListener {
-        void onClick(AnimateChild animateChild);
-    }
-
-    public static abstract class BaseChild implements AnimateChild {
-
-    }
-
-    public static class BitmapChild extends BaseChild {
-
-        private static final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        private Bitmap bitmap = null;
-
-        public BitmapChild(Bitmap bitmap) {
-            this.bitmap = bitmap;
-        }
-
-        @Override
-        public int getWidth() {
-            return bitmap != null ? bitmap.getWidth() : 0;
-        }
-
-        @Override
-        public int getHeight() {
-            return bitmap != null ? bitmap.getHeight() : 0;
-        }
-
-        @Override
-        public void onDraw(Canvas canvas) {
-            if (bitmap != null) {
-                canvas.drawBitmap(bitmap, 0, 0, mPaint);
-            }
-        }
-
-    }
 }

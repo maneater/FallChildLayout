@@ -4,7 +4,7 @@ package com.maneater.android.view.fallchildlayout.fall;
  * Created by Administrator on 2016/10/27 0027.
  */
 
-public abstract class BaseChild implements AnimateView.AnimateChild {
+public abstract class BaseChild implements AnimateChild {
 
 
     float transX = 0;
@@ -16,11 +16,11 @@ public abstract class BaseChild implements AnimateView.AnimateChild {
     float left = 0;
     float top = 0;
 
-    private AnimateView.ChildListener childListener = null;
+    private ChildListener childListener = null;
 
 
     @Override
-    public void setListener(AnimateView.ChildListener childListener) {
+    public void setListener(ChildListener childListener) {
         this.childListener = childListener;
     }
 
@@ -50,13 +50,13 @@ public abstract class BaseChild implements AnimateView.AnimateChild {
     }
 
     @Override
-    public AnimateView.AnimateChild setX(float x) {
+    public AnimateChild setX(float x) {
         setTransX(x - left);
         return this;
     }
 
     @Override
-    public AnimateView.AnimateChild setY(float y) {
+    public AnimateChild setY(float y) {
         setTransY(y - top);
         return this;
     }
@@ -97,34 +97,34 @@ public abstract class BaseChild implements AnimateView.AnimateChild {
     }
 
     @Override
-    public AnimateView.AnimateChild setTransX(float transX) {
+    public AnimateChild setTransX(float transX) {
         this.transX = transX;
         return this;
     }
 
     @Override
-    public AnimateView.AnimateChild setTransY(float transY) {
+    public AnimateChild setTransY(float transY) {
         this.transY = transY;
         return this;
     }
 
 
     @Override
-    public AnimateView.AnimateChild setTrans(float transX, float transY) {
+    public AnimateChild setTrans(float transX, float transY) {
         this.transX = transX;
         this.transY = transY;
         return this;
     }
 
     @Override
-    public AnimateView.AnimateChild setScale(float scaleX, float scaleY) {
+    public AnimateChild setScale(float scaleX, float scaleY) {
         this.scaleX = scaleX;
         this.scaleY = scaleY;
         return this;
     }
 
     @Override
-    public AnimateView.AnimateChild setRotation(float rotation) {
+    public AnimateChild setRotation(float rotation) {
         this.rotation = rotation;
         return this;
     }
