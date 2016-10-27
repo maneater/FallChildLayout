@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -85,7 +84,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
                 int createSize = (int) (createSizeSeed + (perSizeMax - createSizeSeed + 0.5) * Math.random());
                 int[] leftOffset = new int[createSize];
                 for (int i = 0; i < createSize; i++) {
-                    View childView = addChildImageView(i, leftOffset);
+                    View childView = addChildView(i, leftOffset);
                     LayoutParams layoutParams = (LayoutParams) childView.getLayoutParams();
                     leftOffset[i] = layoutParams.leftMargin;
                 }
@@ -107,7 +106,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         return imageView;
     }
 
-    private View addChildImageView(int index, int[] exceptOffset) {
+    private View addChildView(int index, int[] exceptOffset) {
         final View childView = createChildView(index);
 
 
