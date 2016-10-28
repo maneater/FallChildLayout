@@ -21,7 +21,9 @@ import com.maneater.android.view.fallchildlayout.R;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class AnimateView extends View implements AnimateChild.ChildListener {
@@ -29,7 +31,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     //每次最少
     final private int perSizeMin = 1;
     //每次最多
-    final private int perSizeMax = 1;
+    final private int perSizeMax = 4;
     //增加控件的最大时间间隔
     final private int perCreateMaxDelay = 500;
     //增加控件的最小时间间隔
@@ -63,27 +65,13 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         for (AnimateChild animateChild : childrenList) {
             canvas.save();
-
             canvas.translate(animateChild.getX(), animateChild.getY());
             canvas.rotate(animateChild.getRotation(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
             canvas.scale(animateChild.getScaleX(), animateChild.getScaleY(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
             animateChild.onDraw(canvas);
             canvas.restore();
-
-//            canvas.save();
-//
-//            mTmpMatrix.reset();
-//            mTmpMatrix.setTranslate(animateChild.getX(), animateChild.getY());
-//            mTmpMatrix.preRotate(animateChild.getRotation(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
-//            mTmpMatrix.preScale(animateChild.getScaleX(), animateChild.getScaleY(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
-//            canvas.concat(mTmpMatrix);
-//            canvas.drawRect(0, 0, animateChild.getWidth(), animateChild.getHeight(), mPaint);
-//            canvas.drawPoint(mTouchPoint[0], mTouchPoint[1], mPaint);
-//
-//            canvas.restore();
         }
     }
 
@@ -119,10 +107,9 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
                     createSizeSeed = Math.min(createSizeSeed + 1, perSizeMax);
                 }
                 int createSize = (int) (createSizeSeed + (perSizeMax - createSizeSeed + 0.5) * Math.random());
-                int[] leftOffset = new int[createSize];
+                ArrayList<Range<Integer>> leftOffset = new ArrayList<>();
                 for (int i = 0; i < createSize; i++) {
                     AnimateChild childView = addChildView(i, leftOffset);
-                    leftOffset[i] = (int) childView.getLeft();
                     tmpChildList.add(childView);
                 }
                 mPreCreateSize = createSize;
@@ -141,13 +128,13 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
      */
     protected AnimateChild createChildView(int index) {
 //        if (index == 1) {
-        return new TextChild("点我哇!!!!!!点我哇!!!!!!");
+        return new TextChild("Click Me !");
 //        }
 //        return new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
 //        return bitmapChild;
     }
 
-    private AnimateChild addChildView(int index, int[] exceptOffset) {
+    private AnimateChild addChildView(int index, List<Range<Integer>> exceptOffset) {
         final AnimateChild childView = createChildView(index);
         int measuredHeight = childView.getHeight();
         int measuredWidth = childView.getWidth();
@@ -304,23 +291,43 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
         }
     }
 
+    private Range<Integer> createLeftMargin(int maxValue, int viewWidth, List<Range<Integer>> targetRanges) {
 
-    //// TODO: 2016/10/28 0028
-    private int createLeftMargin(int maxValue, int viewWidth, int[] except) {
+        Range<Integer> result = null;
         int createCount = 0;
         int value = 0;
+        Collections.sort(targetRanges);
+        for (Range<Integer> range : targetRanges) {
+            int contains = range.getUpper() - range.getLower();
+            if (contains >= viewWidth) {
+                int left = range.getUpper() - range.getLower();
+
+            }
+        }
+
         do {
             createCount++;
             value = (int) (Math.random() * maxValue);
-
             boolean isRight = true;
 
             for (int anExcept : except) {
+
+                if (anExcept == Integer.MIN_VALUE) {
+                    continue;
+                }
+
                 int start = anExcept - viewWidth - viewWidth;
                 int end = anExcept + viewWidth;
+
                 if (value > start && value < end) {
                     isRight = false;
-                    break;
+                }
+
+                if (!isRight) {
+                    if (value < start) {
+
+                    }
+
                 }
             }
 
