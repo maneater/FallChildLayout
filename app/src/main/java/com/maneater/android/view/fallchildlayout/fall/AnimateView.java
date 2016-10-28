@@ -7,6 +7,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -19,6 +20,7 @@ import com.maneater.android.view.fallchildlayout.R;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -36,6 +38,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     final private int perChildFallDuration = 4000;
     //默认图片
     final private int mImageViewDrawable = R.drawable.pred_picone;
+    private int mMaxRotation = 45;
 
     public AnimateView(Context context) {
         this(context, null);
@@ -50,8 +53,8 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     public AnimateView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setWillNotDraw(false);
-        mPaint.setStrokeWidth(2);
-        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(100);
+        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         mPaint.setColor(Color.GREEN);
     }
 
@@ -70,8 +73,17 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
             animateChild.onDraw(canvas);
             canvas.restore();
 
-            //TMP
-            canvas.drawRect(animateChild.getX(), animateChild.getY(), animateChild.getX() + animateChild.getWidth(), animateChild.getY() + animateChild.getHeight(), mPaint);
+//            canvas.save();
+//
+//            mTmpMatrix.reset();
+//            mTmpMatrix.setTranslate(animateChild.getX(), animateChild.getY());
+//            mTmpMatrix.preRotate(animateChild.getRotation(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
+//            mTmpMatrix.preScale(animateChild.getScaleX(), animateChild.getScaleY(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
+//            canvas.concat(mTmpMatrix);
+//            canvas.drawRect(0, 0, animateChild.getWidth(), animateChild.getHeight(), mPaint);
+//            canvas.drawPoint(mTouchPoint[0], mTouchPoint[1], mPaint);
+//
+//            canvas.restore();
         }
     }
 
@@ -143,7 +155,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
 
         childView.setFrame(createLeftMargin((int) (getWidth() * 0.8), measuredWidth, exceptOffset), -measuredHeight);
 
-        childView.setRotation((float) (Math.random() * 45) * (Math.random() > 0.5f ? 1 : -1));
+        childView.setRotation((float) (Math.random() * mMaxRotation) * (Math.random() > 0.5f ? 1 : -1));
 
         final ValueAnimator animator = ValueAnimator.ofFloat((float) (getHeight() + measuredHeight * 1.5));
         final ChildAnimatorListener childAnimatorListener = new ChildAnimatorListener(childView);
@@ -292,6 +304,8 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
         }
     }
 
+
+    //// TODO: 2016/10/28 0028
     private int createLeftMargin(int maxValue, int viewWidth, int[] except) {
         int createCount = 0;
         int value = 0;
@@ -321,21 +335,62 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
 
     }
 
+    private Matrix mTmpMatrix = new Matrix();
+    private RectF mTmpBounds = new RectF();
+    private float[] mTouchPoint = new float[2];
+    private float[] mTouchPointMapped = new float[2];
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        float eventX = event.getX();
-        float eventY = event.getY();
 
-        RectF childBounds = new RectF();
+        mTouchPoint[0] = event.getX();
+        mTouchPoint[1] = event.getY();
+
+//        Log.d("onTouchEvent：mTouch:", Arrays.toString(mTouchPoint));
+//        mTmpMatrix.reset();
+//        mTmpMatrix.setScale(0, 0, 0, 0);
+//        mTmpMatrix.mapPoints(mTouchPointMapped, mTouchPoint);
+//        Log.d("onTouchEvent：mapped：", Arrays.toString(mTouchPointMapped));
+
+
         for (AnimateChild animateChild : childrenList) {
-            childBounds.set(animateChild.getX(), animateChild.getY(), animateChild.getX() + animateChild.getWidth(), animateChild.getY() + animateChild.getHeight());
 
-            if (childBounds.contains(eventX, eventY) && animateChild.onTouchDown()) {
+            mTouchPoint[0] = event.getX();
+            mTouchPoint[1] = event.getY();
+
+            Log.d("onTouchEvent：mTouch:", Arrays.toString(mTouchPoint));
+            Log.d("onTouchEvent：children：", Arrays.toString(new float[]{animateChild.getWidth() / 2, animateChild.getHeight() / 2, animateChild.getRotation(), animateChild.getScaleX()}));
+
+            mTmpMatrix.reset();
+//            mTmpMatrix.setTranslate(-animateChild.getX(), -animateChild.getY());
+
+            mTmpMatrix.setRotate(
+                    -animateChild.getRotation(),
+                    animateChild.getX() + animateChild.getWidth() / 2,
+                    animateChild.getY() + animateChild.getHeight() / 2);
+
+            mTmpMatrix.preScale(
+                    1 / animateChild.getScaleX(), 1 / animateChild.getScaleY(),
+                    animateChild.getX() + animateChild.getWidth() / 2,
+                    animateChild.getY() + animateChild.getHeight() / 2);
+
+            mTmpMatrix.mapPoints(mTouchPointMapped, mTouchPoint);
+
+            Log.d("onTouchEvent：mapped：", Arrays.toString(mTouchPointMapped));
+
+            mTmpBounds.set(
+                    animateChild.getX(),
+                    animateChild.getY(),
+                    animateChild.getX() + animateChild.getWidth(),
+                    animateChild.getY() + animateChild.getHeight());
+
+            if (mTmpBounds.contains(mTouchPointMapped[0], mTouchPointMapped[1]) && animateChild.onTouchDown()) {
+                invalidate();
                 return true;
             }
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
 
