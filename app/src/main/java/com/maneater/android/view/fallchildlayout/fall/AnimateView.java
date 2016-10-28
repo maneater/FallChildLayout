@@ -5,8 +5,9 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -18,20 +19,15 @@ import com.maneater.android.view.fallchildlayout.R;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-
-/**
- * TODO
- */
 
 public class AnimateView extends View implements AnimateChild.ChildListener {
-    private final int ANIMATOR_ID = 0x7f0b0000;
-    private final int ANIMATOR_LISTENER_ID = 0x7f0b0001;
 
     //每次最少
     final private int perSizeMin = 1;
     //每次最多
-    final private int perSizeMax = 3;
+    final private int perSizeMax = 1;
     //增加控件的最大时间间隔
     final private int perCreateMaxDelay = 500;
     //增加控件的最小时间间隔
@@ -54,7 +50,12 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     public AnimateView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setWillNotDraw(false);
+        mPaint.setStrokeWidth(2);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setColor(Color.GREEN);
     }
+
+    private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -64,11 +65,13 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
             canvas.save();
 
             canvas.translate(animateChild.getX(), animateChild.getY());
-            canvas.rotate(animateChild.getRotation());
-            canvas.scale(animateChild.getScaleX(), animateChild.getScaleY());
+            canvas.rotate(animateChild.getRotation(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
+            canvas.scale(animateChild.getScaleX(), animateChild.getScaleY(), animateChild.getWidth() / 2, animateChild.getHeight() / 2);
             animateChild.onDraw(canvas);
-
             canvas.restore();
+
+            //TMP
+            canvas.drawRect(animateChild.getX(), animateChild.getY(), animateChild.getX() + animateChild.getWidth(), animateChild.getY() + animateChild.getHeight(), mPaint);
         }
     }
 
@@ -125,8 +128,11 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
      * @return 可在这里返回任意View
      */
     protected AnimateChild createChildView(int index) {
-        BitmapChild bitmapChild = new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
-        return bitmapChild;
+//        if (index == 1) {
+        return new TextChild("点我哇!!!!!!点我哇!!!!!!");
+//        }
+//        return new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
+//        return bitmapChild;
     }
 
     private AnimateChild addChildView(int index, int[] exceptOffset) {
@@ -141,8 +147,10 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
 
         final ValueAnimator animator = ValueAnimator.ofFloat((float) (getHeight() + measuredHeight * 1.5));
         final ChildAnimatorListener childAnimatorListener = new ChildAnimatorListener(childView);
-//        childView.setTag(ANIMATOR_ID, animator);
-//        childView.setTag(ANIMATOR_LISTENER_ID, childAnimatorListener);
+
+        childAnimatorMap.put(childView, animator);
+        childAnimatorListenerMap.put(animator, childAnimatorListener);
+
         animator.setInterpolator(new LinearInterpolator());
         animator.setRepeatMode(ValueAnimator.RESTART);
         animator.setRepeatCount(ValueAnimator.INFINITE);
@@ -172,16 +180,24 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     }
 
     private void finishChildAnimator() {
-
-        //TODO
-//        int childSize = childrenList.size();
-//        for (int i = 0; i < childSize; i++) {
-//            AnimateChild view = childrenList.get(i);
-//            ChildAnimatorListener listener = (ChildAnimatorListener) view.getTag(ANIMATOR_LISTENER_ID);
-//            listener.setFinishWhenRepeat(true);
-//        }
+        for (AnimateChild animateChild : childrenList) {
+            Animator animator = childAnimatorMap.get(animateChild);
+            if (animator != null) {
+                childAnimatorListenerMap.get(animator).setFinishWhenRepeat(true);
+            }
+        }
     }
 
+    private HashMap<AnimateChild, Animator> childAnimatorMap = new HashMap<>();
+    private HashMap<Animator, ChildAnimatorListener> childAnimatorListenerMap = new HashMap<>();
+
+    private void removeChildAnimator(AnimateChild animateChild) {
+        Animator animator = childAnimatorMap.remove(animateChild);
+        childAnimatorListenerMap.remove(animator);
+        if (animator != null) {
+            animator.cancel();
+        }
+    }
 
     @Override
     public void onClick(AnimateChild animateChild) {
@@ -192,17 +208,9 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
         clickView = animateChild;
         invalidate();
 
-        finishChildAnimator();
-
         removeCallbacks(createChildRunnable);
-        //TODO
-//        Animator animator = (Animator) animateChild.getTag(ANIMATOR_ID);
-//        if (animator != null) {
-//            animator.cancel();
-//        }
-
-        float left = animateChild.getLeft();
-        float transY = animateChild.getTop();
+        removeChildAnimator(animateChild);
+        finishChildAnimator();
 
         int parentWidth = getWidth();
         int parentHeight = getHeight();
@@ -210,15 +218,15 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
         int viewWidth = animateChild.getWidth();
         int viewHeight = animateChild.getHeight();
 
-        int finalTranX = (parentWidth - viewWidth) / 2;
 
         Animator finalAnimator =
                 ObjectAnimator.ofPropertyValuesHolder(animateChild,
-                        PropertyValuesHolder.ofFloat("setTransX", finalTranX - left),
-                        PropertyValuesHolder.ofFloat("setTransY", (parentHeight - viewHeight) / 2),
+                        PropertyValuesHolder.ofFloat("x", (parentWidth - viewWidth) / 2),
+                        PropertyValuesHolder.ofFloat("y", (parentHeight - viewHeight) / 2),
                         PropertyValuesHolder.ofFloat("scaleX", 3),
-                        PropertyValuesHolder.ofFloat("scaleY", 3))
-                        .setDuration(400);
+                        PropertyValuesHolder.ofFloat("scaleY", 3),
+                        PropertyValuesHolder.ofFloat("rotation", 0))
+                        .setDuration(500);
         finalAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -227,7 +235,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-
+                Log.d("--------", "ofPropertyValuesHolder");
             }
 
             @Override
@@ -277,7 +285,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
         public void onAnimationRepeat(Animator animation) {
             createFinished = true;
             if (finishWhenRepeat) {
-                animation.cancel();
+                removeChildAnimator(targetView.get());
                 childrenList.remove(targetView.get());
                 postInvalidate();
             }
@@ -321,7 +329,8 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
 
         RectF childBounds = new RectF();
         for (AnimateChild animateChild : childrenList) {
-            childBounds.set(animateChild.getLeft(), animateChild.getTop(), animateChild.getLeft() + animateChild.getWidth(), animateChild.getTop() + animateChild.getHeight());
+            childBounds.set(animateChild.getX(), animateChild.getY(), animateChild.getX() + animateChild.getWidth(), animateChild.getY() + animateChild.getHeight());
+
             if (childBounds.contains(eventX, eventY) && animateChild.onTouchDown()) {
                 return true;
             }

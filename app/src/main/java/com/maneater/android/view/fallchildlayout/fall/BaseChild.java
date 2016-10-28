@@ -63,12 +63,12 @@ public abstract class BaseChild implements AnimateChild {
 
     @Override
     public float getLeft() {
-        return this.left + getTransX();
+        return this.left;
     }
 
     @Override
     public float getTop() {
-        return this.top + getTransY();
+        return this.top;
     }
 
     @Override
@@ -120,6 +120,18 @@ public abstract class BaseChild implements AnimateChild {
     public AnimateChild setScale(float scaleX, float scaleY) {
         this.scaleX = scaleX;
         this.scaleY = scaleY;
+        return this;
+    }
+
+    @Override
+    public AnimateChild setScaleY(float scaleY) {
+        this.scaleY = scaleY;
+        return this;
+    }
+
+    @Override
+    public AnimateChild setScaleX(float scaleX) {
+        this.scaleX = scaleX;
         return this;
     }
 

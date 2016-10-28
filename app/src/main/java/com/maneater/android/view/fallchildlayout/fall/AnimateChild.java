@@ -41,6 +41,10 @@ public interface AnimateChild {
 
     AnimateChild setScale(float scaleX, float scaleY);
 
+    AnimateChild setScaleX(float scaleX);
+
+    AnimateChild setScaleY(float scaleY);
+
     AnimateChild setRotation(float rotation);
 
     int getWidth();
