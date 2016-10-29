@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -127,11 +128,11 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
      * @return 可在这里返回任意View
      */
     protected AnimateChild createChildView(int index) {
-//        if (index == 1) {
-        return new TextChild("Click Me !");
-//        }
-//        return new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
-//        return bitmapChild;
+        if (Math.random() > 0.5f) {
+            return new TextChild("Click Me !");
+        } else {
+            return new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
+        }
     }
 
     private AnimateChild addChildView(int index, List<Range<Integer>> exceptOffset) {
