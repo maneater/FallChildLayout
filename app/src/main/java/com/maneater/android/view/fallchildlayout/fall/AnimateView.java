@@ -21,7 +21,6 @@ import com.maneater.android.view.fallchildlayout.R;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -108,6 +107,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
                 }
                 int createSize = (int) (createSizeSeed + (perSizeMax - createSizeSeed + 0.5) * Math.random());
                 ArrayList<Range<Integer>> leftOffset = new ArrayList<>();
+                leftOffset.add(new Range<Integer>(0, getWidth()));
                 for (int i = 0; i < createSize; i++) {
                     AnimateChild childView = addChildView(i, leftOffset);
                     tmpChildList.add(childView);
@@ -140,7 +140,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
         int measuredWidth = childView.getWidth();
 
 
-        childView.setFrame(createLeftMargin((int) (getWidth() * 0.8), measuredWidth, exceptOffset), -measuredHeight);
+        childView.setFrame(createLeftMargin((int) (getWidth() * 0.8), measuredWidth, exceptOffset).getLower(), -measuredHeight);
 
         childView.setRotation((float) (Math.random() * mMaxRotation) * (Math.random() > 0.5f ? 1 : -1));
 
@@ -294,52 +294,45 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
     private Range<Integer> createLeftMargin(int maxValue, int viewWidth, List<Range<Integer>> targetRanges) {
 
         Range<Integer> result = null;
-        int createCount = 0;
-        int value = 0;
-        Collections.sort(targetRanges);
-        for (Range<Integer> range : targetRanges) {
-            int contains = range.getUpper() - range.getLower();
-            if (contains >= viewWidth) {
-                int left = range.getUpper() - range.getLower();
+//        Collections.sort(targetRanges);
 
+        Range<Integer> targetRange = null;
+        for (int i = 0; i < targetRanges.size(); i++) {
+            Range<Integer> range = targetRanges.get(i);
+            int contains = range.getUpper() - range.getLower();
+            // have enough space
+            if (contains >= viewWidth) {
+                targetRange = range;
+                int maxStart = range.getUpper() - viewWidth;
+                int minStart = range.getLower();
+                int start = (int) (minStart + Math.random() * (maxStart - minStart));
+                result = new Range<>(start, start + viewWidth);
+                break;
+                // no use
+            } else {
+                //??
+//                targetRanges.remove(i);
+//                i--;
             }
         }
+        if (targetRange != null) {
+            int rangeStart1 = targetRange.getLower();
+            int rangeEnd1 = result.getLower();
 
-        do {
-            createCount++;
-            value = (int) (Math.random() * maxValue);
-            boolean isRight = true;
+            int rangeStart2 = result.getUpper();
+            int rangeEnd2 = targetRange.getUpper();
+            targetRanges.remove(targetRange);
 
-            for (int anExcept : except) {
-
-                if (anExcept == Integer.MIN_VALUE) {
-                    continue;
-                }
-
-                int start = anExcept - viewWidth - viewWidth;
-                int end = anExcept + viewWidth;
-
-                if (value > start && value < end) {
-                    isRight = false;
-                }
-
-                if (!isRight) {
-                    if (value < start) {
-
-                    }
-
-                }
+            if (rangeStart1 != rangeStart2) {
+                targetRanges.add(new Range<Integer>(rangeStart1, rangeEnd1));
+                targetRanges.add(new Range<Integer>(rangeStart2, rangeEnd2));
             }
+        } else {
+            int tmpStart = (int) (Math.random() * (maxValue - viewWidth));
+            result = new Range<>(tmpStart, tmpStart + viewWidth);
+        }
 
-            if (isRight) {
-                Log.e("createLeftMargin", "createRight by " + createCount);
-                return value;
-            } else if (createCount >= 50) {
-                Log.e("createLeftMargin", "createNotRight by " + createCount);
-                return value;
-            }
-        } while (true);
-
+        return result;
     }
 
     private Matrix mTmpMatrix = new Matrix();

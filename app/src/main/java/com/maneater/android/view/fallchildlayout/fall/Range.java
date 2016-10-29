@@ -42,11 +42,16 @@ public final class Range<T extends Comparable<? super T>> implements Comparable<
     }
 
     private T checkNotNull(T lower, String s) {
-        return null;
+        if (lower == null) {
+            throw new NullPointerException(s);
+        }
+        return lower;
     }
 
-    private T checkNotNull(Range<T> lower, String s) {
-        return null;
+    private void checkNotNull(Range<T> lower, String s) {
+        if (lower == null) {
+            throw new NullPointerException(s);
+        }
     }
 
     /**
