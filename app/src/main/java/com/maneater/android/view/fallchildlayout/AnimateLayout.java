@@ -3,6 +3,7 @@ package com.maneater.android.view.fallchildlayout;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
@@ -11,9 +12,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 
@@ -101,9 +104,17 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
      * @return 可在这里返回任意View
      */
     protected View createChildView(int index) {
+        FrameLayout frameLayout = new FrameLayout(getContext());
         final ImageView imageView = new AppCompatImageView(getContext());
         imageView.setImageResource(mImageViewDrawable);
-        return imageView;
+        frameLayout.addView(imageView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        TextView textView = new TextView(getContext());
+        textView.setText(Math.random() > 0.5f ? "noting" : "everything");
+        textView.setTextColor(Color.WHITE);
+        textView.setVisibility(GONE);
+        textView.setBackgroundColor(Color.RED);
+        frameLayout.addView(textView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        return frameLayout;
     }
 
     private View addChildView(int index, int[] exceptOffset) {
@@ -261,7 +272,11 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         int viewHeight = view.getHeight();
 
         int finalTranX = (parentWidth - viewWidth) / 2;
-        view.animate().translationX(finalTranX - left).translationY((parentHeight - viewHeight) / 2).scaleX(3).scaleY(3).rotation(0).setDuration(400).setListener(new Animator.AnimatorListener() {
+        view.animate()
+                .translationX(finalTranX - left)
+                .translationY((parentHeight - viewHeight) / 2)
+                .scaleX(3).scaleY(3).rotationY(90 * 3).rotation(0)
+                .setDuration(400).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -269,6 +284,14 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (view instanceof ViewGroup) {
+                    ViewGroup viewGroup = (ViewGroup) view;
+                    viewGroup.getChildAt(0).setVisibility(INVISIBLE);
+                    viewGroup.getChildAt(1).setVisibility(VISIBLE);
+                    view.animate().rotationY(90 * 4).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(200).
+                            start();
+                }
+
                 if (childClickListener != null) {
                     childClickListener.onClick(view);
                 }
