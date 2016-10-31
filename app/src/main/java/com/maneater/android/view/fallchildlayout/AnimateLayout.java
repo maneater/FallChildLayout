@@ -27,15 +27,15 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
     private final int ANIMATOR_LISTENER_ID = 0x7f0b0001;
 
     //每次最少
-    final private int perSizeMin = 1;
+    final private int perSizeMin = 5;
     //每次最多
-    final private int perSizeMax = 3;
+    final private int perSizeMax = 10;
     //增加控件的最大时间间隔
     final private int perCreateMaxDelay = 500;
     //增加控件的最小时间间隔
     final private int perCreateMinDelay = 400;
     //下落时长
-    final private int perChildFallDuration = 4000;
+    final private int perChildFallDuration = 10000;
     //默认图片
     final private int mImageViewDrawable = R.drawable.pred_picone;
 
@@ -107,14 +107,7 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
         FrameLayout frameLayout = new FrameLayout(getContext());
         final ImageView imageView = new AppCompatImageView(getContext());
         imageView.setImageResource(mImageViewDrawable);
-        frameLayout.addView(imageView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        TextView textView = new TextView(getContext());
-        textView.setText(Math.random() > 0.5f ? "noting" : "everything");
-        textView.setTextColor(Color.WHITE);
-        textView.setVisibility(GONE);
-        textView.setBackgroundColor(Color.RED);
-        frameLayout.addView(textView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        return frameLayout;
+        return imageView;
     }
 
     private View addChildView(int index, int[] exceptOffset) {
@@ -288,9 +281,9 @@ public class AnimateLayout extends FrameLayout implements View.OnClickListener {
                     ViewGroup viewGroup = (ViewGroup) view;
                     viewGroup.getChildAt(0).setVisibility(INVISIBLE);
                     viewGroup.getChildAt(1).setVisibility(VISIBLE);
-                    view.animate().rotationY(90 * 4).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(200).
-                            start();
                 }
+                view.animate().rotationY(90 * 4).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(200).
+                        start();
 
                 if (childClickListener != null) {
                     childClickListener.onClick(view);

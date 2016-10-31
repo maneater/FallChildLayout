@@ -29,15 +29,15 @@ import java.util.List;
 public class AnimateView extends View implements AnimateChild.ChildListener {
 
     //每次最少
-    final private int perSizeMin = 1;
+    final private int perSizeMin = 5;
     //每次最多
-    final private int perSizeMax = 4;
+    final private int perSizeMax = 10;
     //增加控件的最大时间间隔
     final private int perCreateMaxDelay = 500;
     //增加控件的最小时间间隔
     final private int perCreateMinDelay = 400;
     //下落时长
-    final private int perChildFallDuration = 4000;
+    final private int perChildFallDuration = 10000;
     //默认图片
     final private int mImageViewDrawable = R.drawable.pred_picone;
     private int mMaxRotation = 45;
@@ -128,11 +128,7 @@ public class AnimateView extends View implements AnimateChild.ChildListener {
      * @return 可在这里返回任意View
      */
     protected AnimateChild createChildView(int index) {
-        if (Math.random() > 0.5f) {
-            return new TextChild("Click Me !");
-        } else {
-            return new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
-        }
+        return new BitmapChild(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.pred_picone));
     }
 
     private AnimateChild addChildView(int index, List<Range<Integer>> exceptOffset) {

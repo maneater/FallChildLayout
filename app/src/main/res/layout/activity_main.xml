@@ -7,13 +7,20 @@
     android:orientation="vertical"
     tools:context="com.maneater.android.view.fallchildlayout.MainActivity">
 
-    <com.maneater.android.view.fallchildlayout.fall.AnimateView
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1" />
+    <!--<com.maneater.android.view.fallchildlayout.fall.AnimateView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dip"-->
+    <!--android:layout_weight="1" />-->
 
-    <com.maneater.android.view.fallchildlayout.AnimateLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1" />
+    <Button
+        android:id="@+id/vLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Use Layout" />
+
+    <Button
+        android:id="@+id/vDraw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Use Draw" />
 </LinearLayout>
